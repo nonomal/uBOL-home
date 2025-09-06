@@ -1,6 +1,7 @@
 .PHONY: clean cleanassets \
-	safari safari-extension safari-app safari-release \
-	publish-chromium publish-edge
+	safari safari-extension safari-app \
+	publish-chromium publish-edge publish-firefox \
+	publish-safari-macos publish-safari-ios
 
 # Dev tools
 node_modules:
@@ -34,22 +35,52 @@ safari-app: safari-extension
 		-project "dist/safari/xcode/uBlock Origin Lite.xcodeproj" \
 		-scheme "uBlock Origin Lite (macOS)"
 
+# Publishable releases are downloaded from GitHub.
+
+# make publish-chromium version=[github tag]
 publish-chromium:
 	node publish-extension/publish-chromium.js \
 		ghowner=uBlockOrigin \
 		ghrepo=uBOL-home \
-		cwsid=ddkjiahejlhfcafbddmgiahcphecmpfh \
-		ghtag=$(version)
+		ghtag=$(version) \
+		ghasset=chromium \
+		storeid=ddkjiahejlhfcafbddmgiahcphecmpfh
 
+# make publish-edge version=[github tag]
 publish-edge:
 	node publish-extension/publish-edge.js \
 		ghowner=uBlockOrigin \
 		ghrepo=uBOL-home \
-		edgeid=$(UBOL_EDGE_ID) \
-		ghtag=$(version)
+		ghtag=$(version) \
+		ghasset=edge \
+		storeid=cimighlppcgcoapaliogpjjdehbnofhn \
+		productid=$(UBOL_EDGE_ID)
 
-# Publishable releases are downloaded from GitHub.
-# To create publishable release, fill in with release tag:
-# 
-# node dist/safari/publish-extension.js ghtag=[release tag] ios
-# node dist/safari/publish-extension.js ghtag=[release tag] macos
+# make publish-firefox version=[github tag]
+publish-firefox:
+	node publish-extension/publish-firefox.js \
+		ghowner=uBlockOrigin \
+		ghrepo=uBOL-home \
+		ghtag=$(version) \
+		ghasset=firefox \
+		storeid=uBOLiteRedux@raymondhill.net \
+		channel=unlisted \
+		updatepath=./dist/firefox/updates.json
+
+# Usage: make upload-firefox version=?
+upload-firefox:
+	node publish-extension/upload-firefox.js \
+		ghowner=uBlockOrigin \
+		ghrepo=uBOL-home \
+		ghtag=$(version) \
+		ghasset=firefox \
+		storeid=uBOLiteRedux@raymondhill.net \
+		channel=unlisted \
+		updatepath=./dist/firefox/updates.json
+
+publish-safari-macos:
+	node dist/safari/publish-extension.js ghtag=$(version) macos
+
+publish-safari-ios:
+	node dist/safari/publish-extension.js ghtag=$(version) ios
+
